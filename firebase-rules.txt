@@ -1,0 +1,33 @@
+// Firestore rules for Jupiter Trading Platform
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read and write only their own orders
+    match /orders/{orderId} {
+      allow read: if request.auth != null && resource.data.walletAddress == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.walletAddress == request.auth.uid;
+      allow update: if request.auth != null && resource.data.walletAddress == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.walletAddress == request.auth.uid;
+    }
+    
+    // Allow users to read and write only their own settings
+    match /settings/{userId} {
+      allow read: if request.auth != null && userId == request.auth.uid;
+      allow write: if request.auth != null && userId == request.auth.uid;
+    }
+    
+    // Deny access to all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Instructions for setting up Firebase security rules:
+// 1. Go to your Firebase console: https://console.firebase.google.com/
+// 2. Select your project
+// 3. Navigate to Firestore Database in the left sidebar
+// 4. Click on the "Rules" tab
+// 5. Copy and paste these rules
+// 6. Click "Publish"
